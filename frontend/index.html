@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jenkins Docker CI/CD Assessment</title>
+</head>
+<body>
+    <h1>Jenkins CI/CD Pipeline</h1>
+    <h2>Docker Compose Deployment</h2>
+
+    <p>Frontend is working successfully.</p>
+
+    <button onclick="checkBackend()">Check Backend</button>
+
+    <p id="result"></p>
+
+    <script>
+        async function checkBackend() {
+            try {
+                const response = await fetch("/api");
+                const data = await response.json();
+                document.getElementById("result").innerText =
+                    data.message;
+            } catch (error) {
+                document.getElementById("result").innerText =
+                    "Backend connection failed";
+            }
+        }
+    </script>
+</body>
+</html>
