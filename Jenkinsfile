@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        BACKEND_PORT  = '5000'
+        FRONTEND_PORT = '8081'
+        NODE_ENV      = 'production'
+    }
+
     stages {
 
         stage('Checkout') {
@@ -11,17 +17,18 @@ pipeline {
 
         stage('Build Docker Images') {
             steps {
-                sh 'docker compose build'
+                sh 'docker-compose build'
             }
         }
 
         stage('Test Application') {
             steps {
-                sh 'docker compose up -d'
+                sh 'docker-compose down || true'
+                sh 'docker-compose up -d'
                 sh 'sleep 15'
-                sh 'docker compose ps'
-                sh 'curl -f http://localhost:8080/api'
-                sh 'curl -f http://localhost:8080/health'
+                sh 'docker-compose ps'
+                sh 'curl -f http://localhost:8081/api'
+                sh 'curl -f http://localhost:8081/health'
             }
         }
 
@@ -34,7 +41,7 @@ pipeline {
                   image \
                   --severity HIGH,CRITICAL \
                   --exit-code 0 \
-                  jenkins-docker-assessment-backend:latest
+                  jenkins-docker-assessment-backend
                 '''
 
                 sh '''
@@ -44,21 +51,21 @@ pipeline {
                   image \
                   --severity HIGH,CRITICAL \
                   --exit-code 0 \
-                  jenkins-docker-assessment-frontend:latest
+                  jenkins-docker-assessment-frontend
                 '''
             }
         }
 
         stage('Deployment') {
             steps {
-                sh 'docker compose up -d'
+                sh 'docker-compose up -d'
             }
         }
 
         stage('Health Check') {
             steps {
                 sh 'sleep 10'
-                sh 'curl -f http://localhost:8080/health'
+                sh 'curl -f http://localhost:8081/health'
             }
         }
 
@@ -71,7 +78,7 @@ pipeline {
 
     post {
         always {
-            sh 'docker compose ps || true'
+            sh 'docker-compose ps || true'
         }
 
         success {
